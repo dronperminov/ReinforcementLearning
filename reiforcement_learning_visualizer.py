@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import pygame
 
 
@@ -86,12 +85,6 @@ class ReinforcementLearningVisualizer:
             self.environment.print_info()
             self.algorithm.reset_episode()
             self.render_rewards()
-
-            plt.figure()
-            plt.plot(self.rewards)
-            plt.savefig("rewards.jpg")
-            plt.close()
-
             print('End epidode')
 
         return step['done']
