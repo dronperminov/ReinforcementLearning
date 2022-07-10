@@ -1,41 +1,44 @@
+import json
+import tensorflow as tf
+import argparse
 from envs.snake import Snake
 from algorithms.dqn import DeepQNetwork
+from algorithms.a2c import AdvancedActorCritic
 from reiforcement_learning_visualizer import ReinforcementLearningVisualizer
 
 
+def init_gpu():
+    gpus = tf.config.list_physical_devices('GPU')
+
+    if gpus:
+        try:
+            for gpu in gpus:
+                tf.config.experimental.set_memory_growth(gpu, True)
+        except RuntimeError as e:
+            print(e)
+
+
 def main():
+    parser = argparse.ArgumentParser(description="Reinforcement learning sandbox")
+
+    parser.add_argument("config", type=str, help="Path to json with sandbox config")
+    args = parser.parse_args()
+
+    init_gpu()
     environment = Snake(use_conv=True)
-    config = {
-        'batch_size': 128,
-        'min_replay_size': 1000,
-        'max_replay_size': 10000,
 
-        'learning_rate': 0.004,
-        'optimizer': 'adam',
+    with open(args.config) as f:
+        config = json.load(f)
 
-        'max_epsilon': 0.1,
-        'min_epsilon': 0.005,
-        'decay': 0.001,
-        'gamma': 0.9,
+    algorithm_name = config.get('algorithm', '')
+    if algorithm_name == 'dqn':
+        algorithm = DeepQNetwork(environment, config)
+    elif algorithm_name == 'a2c':
+        algorithm = AdvancedActorCritic(environment, config)
+    else:
+        raise ValueError(f'Unknown algorithm name "{algorithm_name}"')
 
-        'train_model_period': 4,
-        'update_target_model_period': 100,
-        'save_model_path': 'dqn_cnn_snake.h5',
-
-        'agent_architecture': [
-            {'type': 'conv', 'fc': 16, 'fs': 3, 'stride': 1, 'padding': 'same', 'activation': 'relu'},
-            {'type': 'maxpool', 'scale': 2},
-            {'type': 'conv', 'fc': 32, 'fs': 3, 'stride': 1, 'padding': 'same', 'activation': 'relu'},
-            {'type': 'maxpool', 'scale': 2},
-            {'type': 'flatten'},
-            {'type': 'dense', 'size': 256, 'activation': 'relu'}
-        ],
-
-        'agent_weights': 'dqn_cnn_snake_15.h5'
-    }
-
-    dqn = DeepQNetwork(environment, config)
-    visualizer = ReinforcementLearningVisualizer(dqn)
+    visualizer = ReinforcementLearningVisualizer(algorithm)
     visualizer.reset()
 
     while True:

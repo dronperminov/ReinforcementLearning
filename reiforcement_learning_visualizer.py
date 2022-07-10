@@ -6,6 +6,7 @@ class ReinforcementLearningVisualizer:
         self.algorithm = algorithm
         self.environment = algorithm.environment
         self.rewards = []
+        self.episode = 0
         self.__init_pygame()
 
     def __init_pygame(self):
@@ -16,14 +17,18 @@ class ReinforcementLearningVisualizer:
 
         self.width = 960
         self.height = 320
-        self.screen = pygame.display.set_mode([self.width, self.height])
-        self.font = pygame.font.SysFont('Arial', min(self.width // 40, 12))
+        self.info_height = 50
+        self.screen = pygame.display.set_mode([self.width, self.height + self.info_height])
+        self.font_size = min(self.width // 40, 12)
+        self.font = pygame.font.SysFont('Arial', self.font_size)
 
     def reset(self):
         self.rewards.clear()
         self.algorithm.reset()
+        self.episode = 0
 
     def render_environment(self):
+        self.render_info()
         self.environment.render(self.screen, self.width // 2, self.height)
 
     def render_text(self, text: str, x: int, y: int, text_align: str, text_baseline: str):
@@ -76,15 +81,15 @@ class ReinforcementLearningVisualizer:
 
         pygame.display.flip()
 
+    def render_info(self):
+        pygame.draw.rect(self.screen, (255, 255, 255), pygame.Rect(0, self.height, self.width, self.info_height), 0)
+
+        for i, text in enumerate(self.environment.get_info()):
+            self.render_text(text, self.width // 2, self.height + 5 + i * (self.font_size + 3), 'center', 'top')
+
     def step(self):
-        step = self.algorithm.step()
-        self.render_environment()
-
-        if step['done']:
-            self.rewards.append(step['reward'])
-            self.environment.print_info()
-            self.algorithm.reset_episode()
-            self.render_rewards()
-            print('End epidode')
-
-        return step['done']
+        reward = self.algorithm.step(self.render_environment)
+        self.rewards.append(reward)
+        self.render_rewards()
+        self.episode += 1
+        print(f'End episode {self.episode} with reward {reward}')
