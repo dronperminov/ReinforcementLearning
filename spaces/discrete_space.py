@@ -10,7 +10,7 @@ class DiscreteSpace:
         return self.start + np.random.randint(self.shape)
 
     def probabilities_sample(self, probs: np.ndarray):
-        return np.random.choice(np.arange(self.start, self.start + self.shape), p=probs)
+        return self.start + np.random.choice(self.shape, p=probs)
 
     def contains(self, action: int):
         return 0 <= action - self.start < self.shape
