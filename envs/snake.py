@@ -1,4 +1,4 @@
-from typing import Union, List, Tuple
+from typing import Union, List, Tuple, Optional
 import numpy as np
 import cv2
 import pygame
@@ -44,8 +44,11 @@ class Snake(AbstractEnvironment):
     def get_action_space_shape(self) -> int:
         return self.action_space.shape
 
-    def sample_action(self) -> int:
-        return self.action_space.sample()
+    def sample_action(self, probs: Optional[np.array] = None) -> int:
+        if probs is None:
+            return self.action_space.sample()
+
+        return self.action_space.probabilities_sample(probs)
 
     def reset_info(self):
         self.max_length = Snake.INITIAL_LENGTH
@@ -114,12 +117,12 @@ class Snake(AbstractEnvironment):
         pygame.event.pump()
         pygame.display.flip()
 
-    def print_info(self):
-        print(f"Snake length: {len(self.snake)} (max: {self.max_length})")
+    def get_info(self):
+        info = [f"Snake length: {len(self.snake)} (max: {self.max_length})"]
         total = self.wall + self.eat_self + self.no_eat
 
         if total == 0:
-            return
+            return info
 
         ends = [
             f'wall: {self.wall} ({self.wall / total * 100:.2f}%)',
@@ -127,7 +130,8 @@ class Snake(AbstractEnvironment):
             f'no eat: {self.no_eat} ({self.no_eat / total * 100:.2f}%)'
         ]
 
-        print(f"Ends: {', '.join(ends)}")
+        info.append(f"Ends: {', '.join(ends)}")
+        return info
 
     def __init_snake(self):
         snake = []

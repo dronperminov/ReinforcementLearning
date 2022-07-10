@@ -1,5 +1,5 @@
 import abc
-from typing import Union, List, Tuple
+from typing import Union, List, Tuple, Optional
 import numpy as np
 import pygame
 
@@ -14,7 +14,7 @@ class AbstractEnvironment:
         pass
 
     @abc.abstractmethod
-    def sample_action(self) -> int:
+    def sample_action(self, probs: Optional[np.array] = None) -> int:
         pass
 
     @abc.abstractmethod
@@ -34,5 +34,5 @@ class AbstractEnvironment:
         pass
 
     @abc.abstractmethod
-    def print_info(self):
+    def get_info(self) -> List[str]:
         pass
