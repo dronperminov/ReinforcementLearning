@@ -23,7 +23,7 @@ class DeepQNetwork:
 
         if 'agent_weights' in config:
             self.model.load_weights(config['agent_weights'])
-            print(f'Loaded weights from "{config["agent_weights"]}"')
+            print(f'Agent weights were loaded from "{config["agent_weights"]}"')
 
         self.target_model = self.__init_agent(config['agent_architecture'], config['optimizer'], config['learning_rate'])
         self.target_model.set_weights(self.model.get_weights())
@@ -51,7 +51,7 @@ class DeepQNetwork:
         return agent
 
     def get_title(self) -> str:
-        return f'DQN (gamma: {self.gamma}, batch_size: {self.batch_size})'
+        return f'{"D" if self.ddqn else ""}DQN (gamma: {self.gamma}, batch_size: {self.batch_size})'
 
     def get_action(self, state: np.ndarray):
         if np.random.random() < self.epsilon:
@@ -88,40 +88,40 @@ class DeepQNetwork:
         self.environment.reset_info()
         self.replay_buffer.clear()
         self.episode = 0
+        self.epsilon = self.max_epsilon
         self.steps_to_update_target_model = 0
         self.best_reward = float('-inf')
-        self.reset_episode()
 
-    def reset_episode(self):
-        self.epsilon = self.min_epsilon + (self.max_epsilon - self.min_epsilon) * np.exp(-self.decay * self.episode)
-        self.episode += 1
+    def step(self, render=None):
+        state = self.environment.reset()
+        episode_reward = 0
+        done = False
 
-        self.state = self.environment.reset()
-        self.done = False
-        self.total_training_rewards = 0
+        while not done:
+            action = self.get_action(state)
+            next_state, reward, done = self.environment.step(action)
 
-    def step(self):
-        action = self.get_action(self.state)
-        state, reward, done = self.environment.step(action)
+            if render:
+                render()
 
-        self.replay_buffer.add(self.state, action, reward, state, done)
-        self.steps_to_update_target_model += 1
-        self.total_training_rewards += reward
-        self.state = state
+            self.replay_buffer.add(state, action, reward, next_state, done)
+            self.steps_to_update_target_model += 1
+            episode_reward += reward
+            state = next_state
 
-        if done and self.total_training_rewards > self.best_reward:
-            self.best_reward = self.total_training_rewards
-            self.model.save(self.save_model_path)
-            print(f'Model was saved to "{self.save_model_path}"')
+            if done and episode_reward > self.best_reward:
+                self.best_reward = episode_reward
+                self.model.save(self.save_model_path)
+                print(f'Model was saved to "{self.save_model_path}"')
 
-        if self.steps_to_update_target_model % self.train_model_period == 0:
-            self.train()
-
-        if not done:
-            return {'done': False}
+            if self.steps_to_update_target_model % self.train_model_period == 0:
+                self.train()
 
         if self.steps_to_update_target_model > self.update_target_model_period:
             self.target_model.set_weights(self.model.get_weights())
             self.steps_to_update_target_model = 0
 
-        return {'done': True, 'reward': self.total_training_rewards}
+        self.episode += 1
+        self.epsilon = self.min_epsilon + (self.max_epsilon - self.min_epsilon) * np.exp(-self.decay * self.episode)
+
+        return episode_reward
