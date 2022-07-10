@@ -6,6 +6,7 @@ class ReinforcementLearningVisualizer:
         self.algorithm = algorithm
         self.environment = algorithm.environment
         self.rewards = []
+        self.average_rewards = []
         self.episode = 0
         self.__init_pygame()
 
@@ -24,6 +25,7 @@ class ReinforcementLearningVisualizer:
 
     def reset(self):
         self.rewards.clear()
+        self.average_rewards.clear()
         self.algorithm.reset()
         self.episode = 0
 
@@ -68,12 +70,18 @@ class ReinforcementLearningVisualizer:
 
         min_reward, max_reward = min(self.rewards), max(self.rewards)
         reward_lines = []
-        for i, reward in enumerate(self.rewards):
+        average_reward_lines = []
+
+        for i, (reward, avg_reward) in enumerate(zip(self.rewards, self.average_rewards)):
             x = x0 + padding + i / (count - 1) * (width - 2 * padding)
             y = y0 + height - padding - ((reward - min_reward) / (max_reward - min_reward)) * (height - 2 * padding)
+            y_avg = y0 + height - padding - ((avg_reward - min_reward) / (max_reward - min_reward)) * (height - 2 * padding)
+
             reward_lines.append([x, y])
+            average_reward_lines.append([x, y_avg])
 
         pygame.draw.aalines(self.screen, (0, 150, 136), False, reward_lines)
+        pygame.draw.aalines(self.screen, (244, 67, 54), False, average_reward_lines)
 
         self.render_text(f'{max_reward:.2f}', x0 + 2, y0 + padding, 'left', 'bottom')
         self.render_text(f'{min_reward:.2f}', x0 + 2, y0 + height - padding + 2, 'left', 'top')
@@ -90,6 +98,7 @@ class ReinforcementLearningVisualizer:
     def step(self):
         reward = self.algorithm.step(self.render_environment)
         self.rewards.append(reward)
+        self.average_rewards.append(sum(self.rewards[-50:]) / len(self.rewards[-50:]))
         self.render_rewards()
         self.episode += 1
         print(f'End episode {self.episode} with reward {reward}')
