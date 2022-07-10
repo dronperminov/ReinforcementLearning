@@ -4,6 +4,7 @@ import argparse
 from envs.snake import Snake
 from algorithms.dqn import DeepQNetwork
 from algorithms.a2c import AdvancedActorCritic
+from algorithms.reinforce import ReinforcePolicyGradients
 from reiforcement_learning_visualizer import ReinforcementLearningVisualizer
 
 
@@ -35,6 +36,8 @@ def main():
         algorithm = DeepQNetwork(environment, config)
     elif algorithm_name == 'a2c':
         algorithm = AdvancedActorCritic(environment, config)
+    elif algorithm_name == 'reinforce':
+        algorithm = ReinforcePolicyGradients(environment, config)
     else:
         raise ValueError(f'Unknown algorithm name "{algorithm_name}"')
 

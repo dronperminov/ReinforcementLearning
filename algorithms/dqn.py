@@ -25,10 +25,11 @@ class DeepQNetwork:
             self.model.load_weights(config['agent_weights'])
             print(f'Agent weights were loaded from "{config["agent_weights"]}"')
 
+        print("DQN model:")
+        print(self.model.summary())
+
         self.target_model = self.__init_agent(config['agent_architecture'], config['optimizer'], config['learning_rate'])
         self.target_model.set_weights(self.model.get_weights())
-        print("DQN agent model:")
-        print(self.model.summary())
 
         self.max_epsilon = config.get('max_epsilon', 1)
         self.min_epsilon = config.get('min_epsilon', 0.01)
