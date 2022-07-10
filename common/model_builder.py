@@ -17,6 +17,7 @@ class ModelBuilder:
         if config['type'] == 'dense':
             params['units'] = config['size']
             params['activation'] = config.get('activation', 'linear')
+            params['kernel_initializer'] = 'he_uniform'
             return Dense(**params)
 
         if config['type'] == 'conv':
@@ -25,6 +26,7 @@ class ModelBuilder:
             params['strides'] = config.get('stride', 1)
             params['padding'] = config.get('padding', 'valid')
             params['activation'] = config.get('activation', 'relu')
+            params['kernel_initializer'] = 'he_uniform'
             return Conv2D(**params)
 
         if config['type'] == 'maxpool':
