@@ -1,0 +1,32 @@
+{
+    "algorithm": "a2c",
+
+    "learning_rate": 0.001,
+    "optimizer": "adam",
+    "gamma": 0.99,
+
+    "actor_architecture": [
+        {"type": "conv", "fc": 16, "fs": 3, "padding": "same", "activation": "relu"},
+        {"type": "maxpool", "scale": 2},
+        {"type": "conv", "fc": 32, "fs": 3, "padding": "same", "activation": "relu"},
+        {"type": "maxpool", "scale": 2},
+        {"type": "conv", "fc": 64, "fs": 3, "padding": "same", "activation": "relu"},
+        {"type": "maxpool", "scale": 2},
+        {"type": "flatten"},
+        {"type": "dense", "size": 256, "activation": "relu"}
+    ],
+
+    "critic_architecture": [
+        {"type": "conv", "fc": 16, "fs": 3, "padding": "same", "activation": "relu"},
+        {"type": "maxpool", "scale": 2},
+        {"type": "conv", "fc": 32, "fs": 3, "padding": "same", "activation": "relu"},
+        {"type": "maxpool", "scale": 2},
+        {"type": "conv", "fc": 64, "fs": 3, "padding": "same", "activation": "relu"},
+        {"type": "maxpool", "scale": 2},
+        {"type": "flatten"},
+        {"type": "dense", "size": 256, "activation": "relu"}
+    ],
+
+    "save_actor_path": "models/a2c_actor_cnn_snake.h5",
+    "save_critic_path": "models/a2c_critic_cnn_snake.h5"
+}

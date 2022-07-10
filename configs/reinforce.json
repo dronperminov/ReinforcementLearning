@@ -1,0 +1,20 @@
+{
+    "algorithm": "reinforce",
+
+    "learning_rate": 0.001,
+    "optimizer": "adam",
+    "gamma": 0.99,
+
+    "agent_architecture": [
+        {"type": "conv", "fc": 16, "fs": 3, "padding": "same", "activation": "relu"},
+        {"type": "maxpool", "scale": 2},
+        {"type": "conv", "fc": 32, "fs": 3, "padding": "same", "activation": "relu"},
+        {"type": "maxpool", "scale": 2},
+        {"type": "conv", "fc": 64, "fs": 3, "padding": "same", "activation": "relu"},
+        {"type": "maxpool", "scale": 2},
+        {"type": "flatten"},
+        {"type": "dense", "size": 256, "activation": "relu"}
+    ],
+
+    "save_model_path": "models/reinforce_cnn_snake.h5"
+}
